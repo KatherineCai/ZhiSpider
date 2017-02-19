@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'ZhiSpider.spiders'
 #USER_AGENT = 'ZhiSpider (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
