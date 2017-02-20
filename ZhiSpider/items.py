@@ -12,3 +12,18 @@ class ZhispiderItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
+
+class Paper(scrapy.Item):
+    href = scrapy.Field()
+    name = scrapy.Field()
+    authors = scrapy.Field()
+    institutions = scrapy.Field()
+    refs = scrapy.Field()
+
+class Author(scrapy.Item):
+    code = scrapy.Field()
+    name = scrapy.Field()
+
+class Ref(scrapy.Item):
+    href = scrapy.Field()
+    name = scrapy.Field()
