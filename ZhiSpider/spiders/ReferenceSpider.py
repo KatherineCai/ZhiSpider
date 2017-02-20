@@ -19,33 +19,29 @@ class ReferenceSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        # def xpath(Xpath, extract=True):
-        #     assert isinstance(Xpath, str)
-        #     if extract:
-        #         return response.selector.xpath(Xpath).extract()
-        #     else:
-        #         return response.selector.xpath(Xpath)
         def xpath(path):
             return self.xpath(path, response)
 
-        def get_authors(Xpath):
+        def get_authors(path):
             authors = []
-            for raw in xpath(Xpath):
+            for raw in xpath(path):
                 # raw == 'TurnPageToKnet('au','Jack','123456')'
                 splits = raw.split('\'')  # =['TurnPageToKnet(', 'au', ',', '梁德东', ',', '17491188', ');']
-                #                        #   0                  1     2    3        4    5
+                #                         #   0                  1     2    3        4    5
                 author = (splits[3], splits[5])
                 authors.append(author)
             return authors
 
-        def get_institutions(Xpath):
-            return get_authors(Xpath)
+        def get_institutions(path):
+            return get_authors(path)
 
         item = PaperItem()
 
-        # get Paper's name
+        # get Paper's name & check if the page exsists
         name = xpath(NAME_XPATH)
-        item['name'] = xpath(NAME_XPATH)[0]  # only 1 element
+        if len(name) == 0:
+            return
+        item['name'] = name[0]  # only 1 element
 
         # get 2nd part of page url
         url = response._url.split('?')[1]  # choose the part comes after '?'
@@ -58,7 +54,15 @@ class ReferenceSpider(scrapy.Spider):
         # get institutions
         item['institutions'] = get_institutions(INSTITUTIONS_XPATH)
 
-        yield item
+        # get refs
+        url = REF_URL + url + '&RefType=1'
+        request = scrapy.Request(url, callback=self.parse_ref_page)
+        request.meta['item'] = item
+        return request
+
+    def parse_ref_page(self, response):
+        # todo
+        pass
 
     @staticmethod
     def xpath(xpath, response, extract=True):
