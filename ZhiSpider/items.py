@@ -13,12 +13,13 @@ class ZhispiderItem(scrapy.Item):
     # name = scrapy.Field()
     pass
 
-class Paper(scrapy.Item):
+class PaperItem(scrapy.Item):
     href = scrapy.Field()
     name = scrapy.Field()
     authors = scrapy.Field()
     institutions = scrapy.Field()
     refs = scrapy.Field()
+    num_refs = scrapy.Field()
 
 class Author(scrapy.Item):
     code = scrapy.Field()

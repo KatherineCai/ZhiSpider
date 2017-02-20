@@ -1,27 +1,32 @@
 # -*-coding:utf-8-*-
 
 import scrapy
-import ZhiSpider
+from ZhiSpider.items import PaperItem
 
 PAPER_URL = 'http://kns.cnki.net/KCMS/detail/detail.aspx?'
 REF_URL = 'http://kns.cnki.net/kcms/detail/frame/list.aspx?'
-NAME_XPATH =    '//*[@id="mainArea"]/div[2]/div[1]/h2/text()'
-# AUTHORS_XPATH = '//*[@id="mainArea"]/div[4]/div[1]/div[1]'
+
+_NAME_XPATH = '//*[@id="mainArea"]/div[2]/div[1]/h2/text()'
+NAME_XPATH = '//*[@class="title"]/text()'
 AUTHORS_XPATH = '//*[@class="author"]/span/a/@onclick'
 INSTITUTIONS_XPATH = '//*[@class="orgn"]/span/a/@onclick'
 
+
 class ReferenceSpider(scrapy.Spider):
-    name = 'http://kns.cnki.net/'
-    allowed_domain = ['cnki.net']
+    name = 'cnki.net'
+
+    # allowed_domain = ['http://kns.cnki.net']
 
     def parse(self, response):
 
-        def xpath(Xpath, extract=True):
-            assert isinstance(Xpath, str)
-            if extract:
-                return response.selector.xpath(Xpath).extract()
-            else:
-                return response.selector.xpath(Xpath)
+        # def xpath(Xpath, extract=True):
+        #     assert isinstance(Xpath, str)
+        #     if extract:
+        #         return response.selector.xpath(Xpath).extract()
+        #     else:
+        #         return response.selector.xpath(Xpath)
+        def xpath(path):
+            return self.xpath(path, response)
 
         def get_authors(Xpath):
             authors = []
@@ -36,18 +41,32 @@ class ReferenceSpider(scrapy.Spider):
         def get_institutions(Xpath):
             return get_authors(Xpath)
 
+        item = PaperItem()
+
         # get Paper's name
-        item = ZhiSpider.Paper()
-        item['name'] = xpath(NAME_XPATH)[0] # only 1 element
+        name = xpath(NAME_XPATH)
+        item['name'] = xpath(NAME_XPATH)[0]  # only 1 element
 
         # get 2nd part of page url
-        item['href'] = response._url.split('?')[1] # choose the part comes after '?'
+        url = response._url.split('?')[1]  # choose the part comes after '?'
+        url = url.split('&v=')[0]  # cut the tail after '&v='
+        item['href'] = url
 
         # get authors
         item['authors'] = get_authors(AUTHORS_XPATH)
 
         # get institutions
         item['institutions'] = get_institutions(INSTITUTIONS_XPATH)
+
+        yield item
+
+    @staticmethod
+    def xpath(xpath, response, extract=True):
+        assert isinstance(xpath, str)
+        if extract:
+            return response.selector.xpath(xpath).extract()
+        else:
+            return response.selector.xpath(xpath)
 
 # sample url
 #
